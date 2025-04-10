@@ -1,0 +1,21 @@
+<resources>
+    <!-- Base -->
+    <color name="colorPrimary">#1E88E5</color> <!-- Blue -->
+    <color name="colorPrimaryDark">#1565C0</color>
+    <color name="colorAccent">#43A047</color> <!-- Green -->
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#FFFFFF</color>
+    <color name="colorTextSecondary">#DDDDDD</color>
+    <color name="colorCardText">#333333</color>
+
+    <!-- Backgrounds -->
+    <color name="colorBackgroundDark">#121212</color>
+    <color name="colorOverlay">#80000000</color> <!-- 50% black -->
+
+    <!-- Cards / Panels -->
+    <color name="colorCardBackground">#FFFFFF</color>
+
+    <color name="teal_700">#018786</color>
+
+</resources>

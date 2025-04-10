@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Sportify</string>
+    <string-array name="units_array">
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+
+    <string-array name="activity_types">
+        <item>Strength</item>
+        <item>Running</item>
+        <item>Walking</item>
+        <item>Cycling</item>
+        <item>Yoga</item>
+    </string-array>
+
+</resources>

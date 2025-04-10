@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Plan Title -->
+        <TextView
+            android:id="@+id/tvPlanTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Plan Title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Plan Description -->
+        <TextView
+            android:id="@+id/tvPlanDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Plan Description"
+            android:textSize="16sp"
+            android:textColor="#DDDDDD"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Plan Goals -->
+        <TextView
+            android:id="@+id/tvPlanGoals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Goals of the plan"
+            android:textSize="16sp"
+            android:textColor="#CCCCCC"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Start Plan Button -->
+        <Button
+            android:id="@+id/btnStartPlan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start Plan"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#1E88E5" />
+    </LinearLayout>
+</ScrollView>

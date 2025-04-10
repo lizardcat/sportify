@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.sportify">
+
+    <!-- Required for vibration feedback -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Sportify"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Sportify">
+
+        <!-- Entry point -->
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+        <!-- Other screens -->
+        <activity android:name=".StartWorkoutActivity" />
+        <activity android:name=".HistoryActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".PlanOverviewActivity" android:exported="false" />
+        <activity android:name=".PlanDaysActivity" android:exported="false" />
+        <activity android:name=".WorkoutDayActivity" android:exported="false" />
+        <activity android:name=".TrackWorkoutActivity" android:exported="false" />
+        <activity android:name=".WorkoutSummaryActivity" android:exported="false" />
+        <activity android:name=".CreatePlanActivity" android:exported="false" />
+        <activity android:name=".AddPlanDaysActivity" android:exported="false" />
+        <activity android:name=".AddPlanExercisesActivity" android:exported="false" />
+        <activity android:name=".WorkoutPlansActivity" android:exported="false" />
+
+    </application>
+</manifest>
