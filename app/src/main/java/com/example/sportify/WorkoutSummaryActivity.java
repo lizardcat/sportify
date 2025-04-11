@@ -12,10 +12,14 @@ public class WorkoutSummaryActivity extends AppCompatActivity {
     private TextView tvSummaryTitle, tvSummaryDuration, tvSummaryCalories, tvSummaryNotes, tvSummaryText;
     private Button btnDone;
 
+    private String[] exercises;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_summary);
+
+        exercises = getIntent().getStringArrayExtra("exercises");
 
         tvSummaryTitle = findViewById(R.id.tvSummaryTitle);
         tvSummaryDuration = findViewById(R.id.tvSummaryDuration);
@@ -53,6 +57,14 @@ public class WorkoutSummaryActivity extends AppCompatActivity {
             tvSummaryNotes.setText("📝 Notes: " + notes);
         } else {
             tvSummaryNotes.setText("📝 Notes: None");
+        }
+
+        if (exercises != null && exercises.length > 0) {
+            StringBuilder workoutDetails = new StringBuilder("\n🧾 Exercises Completed:\n");
+            for (String ex : exercises) {
+                workoutDetails.append("✓ ").append(ex).append("\n");
+            }
+            tvSummaryText.append(workoutDetails.toString());
         }
 
         // Exercise summary or fallback summary string

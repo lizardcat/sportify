@@ -197,9 +197,10 @@ public class StartWorkoutActivity extends AppCompatActivity {
 
         // Launch summary screen
         Intent intent = new Intent(StartWorkoutActivity.this, WorkoutSummaryActivity.class);
-        intent.putExtra("calories", calories);
+        intent.putExtra("summary", summary);
         intent.putExtra("activityType", activityType);
         intent.putExtra("duration", durationMin);
+        intent.putExtra("calories", calories);
         intent.putExtra("notes", notes);
         startActivity(intent);
         finish();
