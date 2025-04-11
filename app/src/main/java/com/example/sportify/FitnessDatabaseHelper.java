@@ -163,14 +163,14 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
         return db.insert("plan_days", null, values);
     }
 
-    public long insertExercise(long dayId, String name, int sets, int reps) {
+    public void insertExercise(long dayId, String name, int sets, int reps) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("day_id", dayId);
         values.put("name", name);
         values.put("sets", sets);
         values.put("reps", reps);
-        return db.insert("plan_exercises", null, values);
+        db.insert("plan_exercises", null, values);
     }
 
     public void seedTestData() {
