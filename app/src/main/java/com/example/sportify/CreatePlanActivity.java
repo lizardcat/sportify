@@ -40,11 +40,11 @@ public class CreatePlanActivity extends AppCompatActivity {
             if (planId > 0) {
                 Toast.makeText(this, "Plan created! Now add workout days.", Toast.LENGTH_SHORT).show();
 
-                // 🚀 Go to AddPlanDaysActivity and pass the plan ID
+                // Go to AddPlanDaysActivity and pass the plan ID
                 Intent intent = new Intent(CreatePlanActivity.this, AddPlanDaysActivity.class);
                 intent.putExtra("plan_id", planId);
                 startActivity(intent);
-                finish(); // Optional: prevent going back to this screen
+                finish();
             } else {
                 Toast.makeText(this, "Failed to create plan.", Toast.LENGTH_SHORT).show();
             }

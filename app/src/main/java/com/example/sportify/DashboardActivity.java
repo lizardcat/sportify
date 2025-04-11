@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private Button btnChoosePlan, btnViewHistory;
+    private Button btnChoosePlan, btnViewHistory, btnStartFreestyle;
     private ImageButton btnSettings;
     private FitnessDatabaseHelper dbHelper;
 
@@ -31,7 +31,7 @@ public class DashboardActivity extends AppCompatActivity {
         btnChoosePlan = findViewById(R.id.btnChoosePlan);
         btnViewHistory = findViewById(R.id.btnViewHistory);
         btnSettings = findViewById(R.id.btnSettings);
-        Button btnStartFreestyle = findViewById(R.id.btnStartFreestyle);
+        btnStartFreestyle = findViewById(R.id.btnStartFreestyle);
 
         // Go to settings
         btnSettings.setOnClickListener(v -> {

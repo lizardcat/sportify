@@ -311,41 +311,6 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
         return db.rawQuery("SELECT * FROM plan_exercises WHERE day_id = ? ORDER BY id ASC", new String[]{String.valueOf(dayId)});
     }
 
-    public PlanProgress getPlanProgress(long planId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        int totalDays = 0;
-        int completedDays = 0;
-        String nextDayTitle = "Workout Complete!";
-
-        Cursor dayCursor = db.rawQuery("SELECT COUNT(*) AS total FROM plan_days WHERE plan_id = ?", new String[]{String.valueOf(planId)});
-        if (dayCursor.moveToFirst()) {
-            totalDays = dayCursor.getInt(dayCursor.getColumnIndexOrThrow("total"));
-        }
-        dayCursor.close();
-
-        Cursor completeCursor = db.rawQuery(
-                "SELECT COUNT(DISTINCT d.id) AS completed " +
-                        "FROM plan_days d JOIN workouts w ON d.id = w.day_id " +
-                        "WHERE d.plan_id = ?", new String[]{String.valueOf(planId)});
-        if (completeCursor.moveToFirst()) {
-            completedDays = completeCursor.getInt(completeCursor.getColumnIndexOrThrow("completed"));
-        }
-        completeCursor.close();
-
-        Cursor nextDayCursor = db.rawQuery(
-                "SELECT d.day_title FROM plan_days d " +
-                        "LEFT JOIN workouts w ON d.id = w.day_id " +
-                        "WHERE d.plan_id = ? AND w.id IS NULL " +
-                        "ORDER BY d.id ASC LIMIT 1", new String[]{String.valueOf(planId)});
-        if (nextDayCursor.moveToFirst()) {
-            nextDayTitle = nextDayCursor.getString(nextDayCursor.getColumnIndexOrThrow("day_title"));
-        }
-        nextDayCursor.close();
-
-        return new PlanProgress(totalDays, completedDays, nextDayTitle);
-    }
-
     public static class PlanProgress {
         public int totalDays;
         public int completedDays;
@@ -356,17 +321,6 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
             this.completedDays = completedDays;
             this.nextDayTitle = nextDayTitle;
         }
-    }
-
-    public long getFirstPlanId() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT id FROM plans LIMIT 1", null);
-        long id = -1;
-        if (cursor.moveToFirst()) {
-            id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-        }
-        cursor.close();
-        return id;
     }
 
     public String getPlanNameById(long id) {
