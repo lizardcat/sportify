@@ -5,23 +5,20 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private Button btnChoosePlan, btnViewHistory, btnContinuePlan;
-    private TextView tvCurrentPlan, tvPlanProgress, tvNextWorkout;
+    private Button btnChoosePlan, btnViewHistory;
     private ImageButton btnSettings;
-
     private FitnessDatabaseHelper dbHelper;
-    private long currentPlanId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+
         dbHelper = new FitnessDatabaseHelper(this);
 
         SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
@@ -33,73 +30,27 @@ public class DashboardActivity extends AppCompatActivity {
         // Initialize views
         btnChoosePlan = findViewById(R.id.btnChoosePlan);
         btnViewHistory = findViewById(R.id.btnViewHistory);
-        btnContinuePlan = findViewById(R.id.btnContinuePlan);
         btnSettings = findViewById(R.id.btnSettings);
-        tvCurrentPlan = findViewById(R.id.tvCurrentPlan);
-        tvPlanProgress = findViewById(R.id.tvPlanProgress);
-        tvNextWorkout = findViewById(R.id.tvNextWorkout);
-
-        dbHelper = new FitnessDatabaseHelper(this);
-        loadCurrentPlanInfo();
+        Button btnStartFreestyle = findViewById(R.id.btnStartFreestyle);
 
         // Go to settings
         btnSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(DashboardActivity.this, SettingsActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(DashboardActivity.this, SettingsActivity.class));
         });
 
         // Go to choose plan screen
         btnChoosePlan.setOnClickListener(v -> {
-            Intent intent = new Intent(DashboardActivity.this, WorkoutPlansActivity.class);
-            startActivity(intent);
-        });
-
-        // Go to plan days
-        btnContinuePlan.setOnClickListener(v -> {
-            if (currentPlanId != -1) {
-                Intent intent = new Intent(DashboardActivity.this, PlanDaysActivity.class);
-                intent.putExtra("plan_id", currentPlanId);
-                startActivity(intent);
-            }
+            startActivity(new Intent(DashboardActivity.this, WorkoutPlansActivity.class));
         });
 
         // Go to history
         btnViewHistory.setOnClickListener(v -> {
-            Intent intent = new Intent(DashboardActivity.this, HistoryActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(DashboardActivity.this, HistoryActivity.class));
         });
 
         // Go to freestyle workouts
-        Button btnStartFreestyle = findViewById(R.id.btnStartFreestyle);
         btnStartFreestyle.setOnClickListener(v -> {
-            Intent intent = new Intent(DashboardActivity.this, StartWorkoutActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(DashboardActivity.this, StartWorkoutActivity.class));
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadCurrentPlanInfo();
-    }
-
-
-    private void loadCurrentPlanInfo() {
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        currentPlanId = dbHelper.getFirstPlanId(); // You can improve this to get last selected plan
-
-        if (currentPlanId != -1) {
-            String planName = dbHelper.getPlanNameById(currentPlanId);
-            FitnessDatabaseHelper.PlanProgress progress = dbHelper.getPlanProgress(currentPlanId);
-
-            tvCurrentPlan.setText("Current Plan: " + planName);
-            tvPlanProgress.setText("Progress: Day " + (progress.completedDays + 1) + " of " + progress.totalDays);
-            tvNextWorkout.setText("Next: " + progress.nextDayTitle);
-        } else {
-            tvCurrentPlan.setText("No active plan");
-            tvPlanProgress.setText("");
-            tvNextWorkout.setText("");
-            btnContinuePlan.setEnabled(false);
-        }
     }
 }

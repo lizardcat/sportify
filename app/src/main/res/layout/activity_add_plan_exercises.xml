@@ -34,8 +34,9 @@
             android:id="@+id/spinnerDaySelector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:popupBackground="@android:color/white"
-            android:backgroundTint="@android:color/white" />
+            android:popupBackground="#1E1E1E"
+            android:backgroundTint="#CCCCCC"
+            android:theme="@style/SpinnerDark" />
 
         <View android:layout_height="24dp" android:layout_width="match_parent" />
 

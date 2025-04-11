@@ -100,9 +100,7 @@ public class TrackWorkoutActivity extends AppCompatActivity {
             intent.putExtra("day_name", dayName);
             intent.putExtra("duration", timeStr);
             intent.putExtra("exercises", exercisesList.toArray(new String[0]));
-            intent.putExtra("notes", notes); // ← Add this
-            startActivity(intent);
-
+            intent.putExtra("notes", notes);
             startActivity(intent);
             finish();
         });
@@ -145,11 +143,20 @@ public class TrackWorkoutActivity extends AppCompatActivity {
             View setEntry = getLayoutInflater().inflate(R.layout.item_set_entry, null);
 
             TextView tvSetLabel = setEntry.findViewById(R.id.tvSetNumber);
+            EditText editReps = setEntry.findViewById(R.id.editRepsDone);
+            EditText editWeight = setEntry.findViewById(R.id.editWeightUsed);
+            Button btnComplete = setEntry.findViewById(R.id.btnCompleteSet);
+
             tvSetLabel.setText("Set " + i);
 
-            // Optionally access EditTexts:
-            EditText editRepsDone = setEntry.findViewById(R.id.editRepsDone);
-            EditText editWeightUsed = setEntry.findViewById(R.id.editWeightUsed);
+            btnComplete.setOnClickListener(v -> {
+                // Disable input and dim the card
+                editReps.setEnabled(false);
+                editWeight.setEnabled(false);
+                btnComplete.setEnabled(false);
+                setEntry.setAlpha(0.5f);
+                btnComplete.setText("✓ Completed");
+            });
 
             setList.addView(setEntry);
         }

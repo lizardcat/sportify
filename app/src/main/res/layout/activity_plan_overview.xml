@@ -10,6 +10,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Plan Image -->
+        <ImageView
+            android:id="@+id/imgPlanImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="20dp"
+            android:contentDescription="Plan Image"
+            android:src="@drawable/bg_statistics" /> <!-- Default fallback -->
+
         <!-- Plan Title -->
         <TextView
             android:id="@+id/tvPlanTitle"

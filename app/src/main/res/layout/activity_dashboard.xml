@@ -68,96 +68,41 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Plan Progress Card -->
-        <LinearLayout
-            android:id="@+id/planProgressCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical"
-            android:padding="20dp"
-            android:background="@android:color/white"
-            android:elevation="6dp"
-            android:layout_margin="20dp"
-            android:clipToPadding="false">
+        <!-- Buttons -->
 
-            <TextView
-                android:id="@+id/tvCurrentPlan"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Current Plan: Stronglifts 5x5"
-                android:textColor="#333"
-                android:textStyle="bold"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/tvPlanProgress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Progress: Day 2 of 12"
-                android:textColor="#444"
-                android:textSize="16sp"
-                android:layout_marginTop="8dp" />
-
-            <TextView
-                android:id="@+id/tvNextWorkout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Next: Upper Body Hypertrophy"
-                android:textColor="#666"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp" />
-
-            <Button
-                android:id="@+id/btnContinuePlan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Continue Plan"
-                android:backgroundTint="#1E88E5"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="16dp" />
-        </LinearLayout>
-
-        <!-- Bottom Buttons -->
-
-        <Button
-            android:id="@+id/btnStartFreestyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Start Freestyle Workout"
-            android:backgroundTint="#FF9800"
-            android:textColor="@android:color/white"
-            android:layout_marginHorizontal="20dp"
-            android:layout_above="@id/buttonLayout"
-            android:layout_marginBottom="12dp" />
-
+        <!-- Vertical Button Stack -->
         <LinearLayout
             android:id="@+id/buttonLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:weightSum="2"
-            android:layout_marginBottom="20dp">
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginHorizontal="40dp"
+            android:layout_marginTop="100dp">
+
+            <Button
+                android:id="@+id/btnStartFreestyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start Freestyle Workout"
+                android:backgroundTint="#FF9800"
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="20dp" />
 
             <Button
                 android:id="@+id/btnChoosePlan"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Choose Plan"
                 android:backgroundTint="#1E88E5"
-                android:textColor="@android:color/white" />
-
-            <Space
-                android:layout_width="20dp"
-                android:layout_height="wrap_content" />
+                android:textColor="@android:color/white"
+                android:layout_marginBottom="20dp" />
 
             <Button
                 android:id="@+id/btnViewHistory"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="View History"
                 android:backgroundTint="#43A047"

@@ -29,5 +29,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- for the Spinner color -->
+    <style name="SpinnerDark" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColorHint">#AAAAAA</item>
+    </style>
 
 </resources>

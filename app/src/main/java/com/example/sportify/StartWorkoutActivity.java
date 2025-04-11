@@ -1,9 +1,6 @@
 package com.example.sportify;
 
 import android.content.Intent;
-import android.os.Build;
-import android.os.Vibrator;
-import android.os.VibrationEffect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -16,7 +13,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.SimpleDateFormat;
@@ -28,6 +24,8 @@ public class StartWorkoutActivity extends AppCompatActivity {
     private Spinner spinnerActivityType;
     private TextView textTimer;
     private Button btnStartStop;
+
+    private Button btnFinishWorkout;
     private EditText editNotes, editSets, editReps, editWeight;
     private LinearLayout workoutSection;
     private View strengthFields;
@@ -57,6 +55,7 @@ public class StartWorkoutActivity extends AppCompatActivity {
         editWeight = findViewById(R.id.editWeight);
         workoutSection = findViewById(R.id.workoutSection);
         strengthFields = findViewById(R.id.strengthFields);
+        btnFinishWorkout = findViewById(R.id.btnFinishWorkout);
 
         dbHelper = new FitnessDatabaseHelper(this);
         userWeightKg = dbHelper.getUserWeightKg();
@@ -140,6 +139,19 @@ public class StartWorkoutActivity extends AppCompatActivity {
                 double durationMin = (endTime - startTime) / 60000.0;
 
                 saveWorkout(durationMin);
+            }
+        });
+
+        btnFinishWorkout.setOnClickListener(v -> {
+            if (isRunning) {
+                handler.removeCallbacks(timerRunnable);
+                isRunning = false;
+                isPaused = false;
+
+                double durationMin = (System.currentTimeMillis() - startTime) / 60000.0;
+                saveWorkout(durationMin);
+            } else {
+                Toast.makeText(this, "Workout is not running.", Toast.LENGTH_SHORT).show();
             }
         });
 

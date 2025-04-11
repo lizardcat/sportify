@@ -281,22 +281,19 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
         insertExercise(phatDay5, "Overhead Tricep Extension", 3, 12);
 
         // Stronglifts
-        insertCompletedWorkout("2025-04-10", "Stronglifts 5x5", "Day 1 - Full Body A", day1, "00:45:00", "Solid session. Bench felt light.");
-        insertCompletedWorkout("2025-04-12", "Stronglifts 5x5", "Day 2 - Full Body B", day2, "00:48:00", "Struggled on deadlifts.");
-        insertCompletedWorkout("2025-04-14", "Stronglifts 5x5", "Day 3 - Full Body C", day3, "00:50:00", "Pull-ups felt strong.");
+        insertCompletedWorkout("2025-04-02", "Stronglifts 5x5", "Day 1 - Full Body A", day1, "00:45:00", "Solid session. Bench felt light.");
+        insertCompletedWorkout("2025-04-03", "Stronglifts 5x5", "Day 2 - Full Body B", day2, "00:48:00", "Struggled on deadlifts.");
+        insertCompletedWorkout("2025-04-04", "Stronglifts 5x5", "Day 3 - Full Body C", day3, "00:50:00", "Pull-ups felt strong.");
 
 // PHUL
-        insertCompletedWorkout("2025-04-11", "PHUL", "Day 1 - Upper Power", phulDay1, "01:00:00", "Good pump. PR on incline DB press.");
-        insertCompletedWorkout("2025-04-13", "PHUL", "Day 2 - Lower Power", phulDay2, "00:55:00", "Quads were toast.");
-        insertCompletedWorkout("2025-04-15", "PHUL", "Day 4 - Upper Hypertrophy", phulDay4, "01:10:00", "High volume. Arms burning.");
-        insertCompletedWorkout("2025-04-17", "PHUL", "Day 5 - Lower Hypertrophy", phulDay5, "00:58:00", "Hamstring curls were killer.");
+        insertCompletedWorkout("2025-04-05", "PHUL", "Day 1 - Upper Power", phulDay1, "01:00:00", "Good pump. PR on incline DB press.");
+        insertCompletedWorkout("2025-04-06", "PHUL", "Day 2 - Lower Power", phulDay2, "00:55:00", "Quads were toast.");
+        insertCompletedWorkout("2025-04-07", "PHUL", "Day 4 - Upper Hypertrophy", phulDay4, "01:10:00", "High volume. Arms burning.");
+        insertCompletedWorkout("2025-04-08", "PHUL", "Day 5 - Lower Hypertrophy", phulDay5, "00:58:00", "Hamstring curls were killer.");
 
 // PHAT
         insertCompletedWorkout("2025-04-09", "PHAT", "Day 1 - Upper Power", phatDay1, "01:05:00", "Hit 5 reps on bench with 90kg.");
-        insertCompletedWorkout("2025-04-11", "PHAT", "Day 2 - Lower Power", phatDay2, "01:00:00", "Legs shaking by the end.");
-        insertCompletedWorkout("2025-04-13", "PHAT", "Day 3 - Back and Shoulders Hypertrophy", phatDay3, "01:12:00", "Delts and lats feel great.");
-        insertCompletedWorkout("2025-04-15", "PHAT", "Day 4 - Lower Body Hypertrophy", phatDay4, "01:00:00", "Lunges burned.");
-        insertCompletedWorkout("2025-04-17", "PHAT", "Day 5 - Chest and Arms Hypertrophy", phatDay5, "01:08:00", "Arms are toast. Good pump.");
+        insertCompletedWorkout("2025-04-10", "PHAT", "Day 2 - Lower Power", phatDay2, "01:00:00", "Legs shaking by the end.");
     }
 
     public Cursor getAllPlans() {

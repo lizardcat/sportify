@@ -64,16 +64,8 @@ public class WorkoutSummaryActivity extends AppCompatActivity {
 
         // Finish button
         btnDone.setOnClickListener(v -> {
-            new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Workout Saved ✅")
-                    .setMessage("Your workout has been successfully saved.")
-                    .setPositiveButton("OK", (dialog, which) -> {
-                        dialog.dismiss();
-                        setResult(RESULT_OK); // optional if using startActivityForResult
-                        finish(); // go back to Dashboard
-                    })
-                    .setCancelable(false)
-                    .show();
+            setResult(RESULT_OK);
+            finish();
         });
 
     }
