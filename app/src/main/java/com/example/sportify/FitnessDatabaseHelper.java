@@ -311,18 +311,6 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
         return db.rawQuery("SELECT * FROM plan_exercises WHERE day_id = ? ORDER BY id ASC", new String[]{String.valueOf(dayId)});
     }
 
-    public static class PlanProgress {
-        public int totalDays;
-        public int completedDays;
-        public String nextDayTitle;
-
-        public PlanProgress(int totalDays, int completedDays, String nextDayTitle) {
-            this.totalDays = totalDays;
-            this.completedDays = completedDays;
-            this.nextDayTitle = nextDayTitle;
-        }
-    }
-
     public String getPlanNameById(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT name FROM plans WHERE id = ?", new String[]{String.valueOf(id)});
