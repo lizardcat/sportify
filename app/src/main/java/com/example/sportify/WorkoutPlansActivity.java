@@ -3,16 +3,20 @@ package com.example.sportify;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class WorkoutPlansActivity extends AppCompatActivity {
+
+    private static final String TAG = "WorkoutPlansActivity";
 
     private LinearLayout planListLayout;
     private FitnessDatabaseHelper dbHelper;
@@ -30,15 +34,30 @@ public class WorkoutPlansActivity extends AppCompatActivity {
     }
 
     private void loadPlansFromDatabase() {
-        Cursor cursor = dbHelper.getAllPlans();
-        while (cursor.moveToNext()) {
-            long planId = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            String desc = cursor.getString(cursor.getColumnIndexOrThrow("description"));
+        Cursor cursor = null;
+        try {
+            cursor = dbHelper.getAllPlans();
+            if (cursor == null) {
+                Log.w(TAG, "Cursor is null when loading plans");
+                Toast.makeText(this, "Error loading plans", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            addPlanCard(planId, name, desc);
+            while (cursor.moveToNext()) {
+                long planId = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                String desc = cursor.getString(cursor.getColumnIndexOrThrow("description"));
+
+                addPlanCard(planId, name, desc);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading plans from database", e);
+            Toast.makeText(this, "Error loading plans", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        cursor.close();
     }
 
     private void addPlanCard(long planId, String name, String description) {

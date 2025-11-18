@@ -3,6 +3,7 @@ package com.example.sportify;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,6 +12,8 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PlanOverviewActivity extends AppCompatActivity {
+
+    private static final String TAG = "PlanOverviewActivity";
 
     private TextView tvTitle, tvDescription, tvGoals;
     private Button btnStartPlan;
@@ -49,33 +52,43 @@ public class PlanOverviewActivity extends AppCompatActivity {
     }
 
     private void loadPlanDetails(long id) {
-        Cursor cursor = dbHelper.getReadableDatabase().rawQuery(
-                "SELECT name, description, goals FROM plans WHERE id = ?",
-                new String[]{String.valueOf(id)}
-        );
+        Cursor cursor = null;
+        try {
+            cursor = dbHelper.getReadableDatabase().rawQuery(
+                    "SELECT name, description, goals FROM plans WHERE id = ?",
+                    new String[]{String.valueOf(id)}
+            );
 
-        if (cursor.moveToFirst()) {
-            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            tvTitle.setText(name);
-            tvDescription.setText(cursor.getString(cursor.getColumnIndexOrThrow("description")));
-            tvGoals.setText(cursor.getString(cursor.getColumnIndexOrThrow("goals")));
+            if (cursor != null && cursor.moveToFirst()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                tvTitle.setText(name);
+                tvDescription.setText(cursor.getString(cursor.getColumnIndexOrThrow("description")));
+                tvGoals.setText(cursor.getString(cursor.getColumnIndexOrThrow("goals")));
 
-            // Set image based on plan name
-            if (name.toLowerCase().contains("stronglift")) {
-                imgPlanImage.setImageResource(R.drawable.bg_stronglifts);
-            } else if (name.toLowerCase().contains("phul")) {
-                imgPlanImage.setImageResource(R.drawable.bg_phul);
-            } else if (name.toLowerCase().contains("phat")) {
-                imgPlanImage.setImageResource(R.drawable.bg_phat);
+                // Set image based on plan name
+                if (name.toLowerCase().contains("stronglift")) {
+                    imgPlanImage.setImageResource(R.drawable.bg_stronglifts);
+                } else if (name.toLowerCase().contains("phul")) {
+                    imgPlanImage.setImageResource(R.drawable.bg_phul);
+                } else if (name.toLowerCase().contains("phat")) {
+                    imgPlanImage.setImageResource(R.drawable.bg_phat);
+                } else {
+                    imgPlanImage.setImageResource(R.drawable.bg_hybrid); // fallback
+                }
+
             } else {
-                imgPlanImage.setImageResource(R.drawable.bg_hybrid); // fallback
+                Log.w(TAG, "Plan not found for ID: " + id);
+                Toast.makeText(this, "Plan not found", Toast.LENGTH_SHORT).show();
+                finish();
             }
-
-        } else {
-            Toast.makeText(this, "Plan not found", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading plan details for ID: " + id, e);
+            Toast.makeText(this, "Error loading plan details", Toast.LENGTH_SHORT).show();
             finish();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-
-        cursor.close();
     }
 }

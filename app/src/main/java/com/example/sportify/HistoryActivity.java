@@ -2,6 +2,9 @@ package com.example.sportify;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class HistoryActivity extends AppCompatActivity {
+
+    private static final String TAG = "HistoryActivity";
 
     RecyclerView recyclerHistory;
     WorkoutAdapter adapter;
@@ -37,22 +42,36 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void loadWorkouts() {
         workoutList.clear(); // Clear previous data
-        Cursor cursor = dbHelper.getAllWorkouts();
+        Cursor cursor = null;
 
-        while (cursor.moveToNext()) {
-            Workout workout = new Workout(
-                    cursor.getString(cursor.getColumnIndexOrThrow("date")),
-                    cursor.getString(cursor.getColumnIndexOrThrow("activity_type")),
-                    cursor.getDouble(cursor.getColumnIndexOrThrow("duration_min")),
-                    cursor.getInt(cursor.getColumnIndexOrThrow("sets")),
-                    cursor.getInt(cursor.getColumnIndexOrThrow("reps")),
-                    cursor.getDouble(cursor.getColumnIndexOrThrow("weight_kg")),
-                    cursor.getString(cursor.getColumnIndexOrThrow("notes"))
-            );
-            workoutList.add(workout);
+        try {
+            cursor = dbHelper.getAllWorkouts();
+            if (cursor == null) {
+                Log.w(TAG, "Cursor is null when loading workouts");
+                Toast.makeText(this, "Error loading workout history", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            while (cursor.moveToNext()) {
+                Workout workout = new Workout(
+                        cursor.getString(cursor.getColumnIndexOrThrow("date")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("activity_type")),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow("duration_min")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("sets")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("reps")),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow("weight_kg")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("notes"))
+                );
+                workoutList.add(workout);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading workouts from database", e);
+            Toast.makeText(this, "Error loading workout history", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-
-        cursor.close();
 
         if (adapter == null) {
             adapter = new WorkoutAdapter(workoutList);
