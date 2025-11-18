@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +22,8 @@ import java.util.Locale;
 
 public class TrackWorkoutActivity extends AppCompatActivity {
 
+    private static final String TAG = "TrackWorkoutActivity";
+
     private TextView tvTimer;
     private LinearLayout setContainer;
     private Button btnFinish, btnPauseResume;
@@ -29,7 +32,7 @@ public class TrackWorkoutActivity extends AppCompatActivity {
     private boolean isPaused = false;
     private long startTime;
     private long pausedTime;
-    private Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable timerRunnable;
 
     private String planName;
@@ -54,9 +57,17 @@ public class TrackWorkoutActivity extends AppCompatActivity {
         btnPauseResume = findViewById(R.id.btnPauseResume);
         editNotes = findViewById(R.id.editNotes);
 
-        planName = getIntent().getStringExtra("plan_name");
-        dayName = getIntent().getStringExtra("day_name");
-        dayId = getIntent().getLongExtra("day_id", -1);
+        // Safely get intent extras with null checks
+        if (getIntent() != null) {
+            planName = getIntent().getStringExtra("plan_name");
+            dayName = getIntent().getStringExtra("day_name");
+            dayId = getIntent().getLongExtra("day_id", -1);
+        } else {
+            Log.w(TAG, "Intent is null in TrackWorkoutActivity");
+        }
+
+        if (planName == null) planName = "Custom Plan";
+        if (dayName == null) dayName = "Workout Session";
 
         loadExercisesFromDatabase();
         startTimer();
@@ -109,26 +120,37 @@ public class TrackWorkoutActivity extends AppCompatActivity {
     private void loadExercisesFromDatabase() {
         if (dayId == -1) {
             Toast.makeText(this, "Error: No day ID provided!", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "No day ID provided for loading exercises");
             return;
         }
 
+        Cursor cursor = null;
+        try {
+            Log.d(TAG, "Loading exercises for day ID: " + dayId);
+            cursor = dbHelper.getExercisesForDay(dayId);
 
-        Log.d("TrackWorkout", "Loading exercises for day ID: " + dayId);
-        Cursor cursor = dbHelper.getExercisesForDay(dayId);
-        if (cursor.getCount() == 0) {
-            Toast.makeText(this, "No exercises found for this workout day.", Toast.LENGTH_SHORT).show();
-            return;
+            if (cursor == null || cursor.getCount() == 0) {
+                Toast.makeText(this, "No exercises found for this workout day.", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "No exercises found for day ID: " + dayId);
+                return;
+            }
+
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                int sets = cursor.getInt(cursor.getColumnIndexOrThrow("sets"));
+                int reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"));
+
+                exercisesList.add(name + " - " + sets + " x " + reps);
+                addExerciseCard(name, sets, reps);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading exercises from database", e);
+            Toast.makeText(this, "Error loading exercises", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-
-        while (cursor.moveToNext()) {
-            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            int sets = cursor.getInt(cursor.getColumnIndexOrThrow("sets"));
-            int reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"));
-
-            exercisesList.add(name + " - " + sets + " x " + reps);
-            addExerciseCard(name, sets, reps);
-        }
-        cursor.close();
     }
 
     private void addExerciseCard(String name, int sets, int reps) {
@@ -194,8 +216,32 @@ public class TrackWorkoutActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        // Remove handler callbacks when activity is paused to prevent memory leaks
+        if (handler != null && timerRunnable != null) {
+            handler.removeCallbacks(timerRunnable);
+            Log.d(TAG, "Handler callbacks removed in onPause");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Resume timer if it was running
+        if (isRunning && !isPaused && timerRunnable != null) {
+            handler.post(timerRunnable);
+            Log.d(TAG, "Handler callbacks resumed in onResume");
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        handler.removeCallbacks(timerRunnable);
+        // Clean up handler callbacks to prevent memory leaks
+        if (handler != null && timerRunnable != null) {
+            handler.removeCallbacks(timerRunnable);
+            Log.d(TAG, "Handler callbacks removed in onDestroy");
+        }
     }
 }

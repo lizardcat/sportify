@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.sportify"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.sportify"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -19,11 +19,17 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // Enable code minification, obfuscation, and optimization for production
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            // Disable minification for debug builds for easier debugging
+            isMinifyEnabled = false
         }
     }
     compileOptions {
