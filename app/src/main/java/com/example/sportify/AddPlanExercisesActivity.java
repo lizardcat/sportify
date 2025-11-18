@@ -4,11 +4,19 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 public class AddPlanExercisesActivity extends AppCompatActivity {
+
+    private static final String TAG = "AddPlanExercisesActivity";
+    private static final int MAX_EXERCISE_NAME_LENGTH = 100;
+    private static final int MIN_SETS = 1;
+    private static final int MAX_SETS = 20;
+    private static final int MIN_REPS = 1;
+    private static final int MAX_REPS = 100;
 
     private LinearLayout exerciseContainer;
     private Spinner daySelector;
@@ -49,26 +57,45 @@ public class AddPlanExercisesActivity extends AppCompatActivity {
     }
 
     private void loadPlanDays() {
-        Cursor cursor = dbHelper.getDaysForPlan(planId);
-        dayIds.clear();
-        dayTitles.clear();
+        Cursor cursor = null;
+        try {
+            cursor = dbHelper.getDaysForPlan(planId);
+            dayIds.clear();
+            dayTitles.clear();
 
-        while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-            String title = cursor.getString(cursor.getColumnIndexOrThrow("day_title"));
-            dayIds.add(id);
-            dayTitles.add(title);
-        }
-        cursor.close();
+            if (cursor == null) {
+                Log.e(TAG, "Cursor is null when loading plan days");
+                Toast.makeText(this, "Error loading workout days", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
 
-        if (dayTitles.isEmpty()) {
-            Toast.makeText(this, "No workout days found. Please add days first.", Toast.LENGTH_LONG).show();
+            while (cursor.moveToNext()) {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow("day_title"));
+                dayIds.add(id);
+                dayTitles.add(title);
+            }
+
+            if (dayTitles.isEmpty()) {
+                Log.w(TAG, "No workout days found for plan ID: " + planId);
+                Toast.makeText(this, "No workout days found. Please add days first.", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, dayTitles);
+            daySelector.setAdapter(adapter);
+            Log.d(TAG, "Loaded " + dayTitles.size() + " workout days");
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading plan days", e);
+            Toast.makeText(this, "Error loading workout days", Toast.LENGTH_SHORT).show();
             finish();
-            return;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, dayTitles);
-        daySelector.setAdapter(adapter);
     }
 
     private void addExerciseEntry() {
@@ -76,8 +103,29 @@ public class AddPlanExercisesActivity extends AppCompatActivity {
         String setsStr = editSets.getText().toString().trim();
         String repsStr = editReps.getText().toString().trim();
 
-        if (name.isEmpty() || setsStr.isEmpty() || repsStr.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+        // Validate exercise name
+        if (name.isEmpty()) {
+            editExerciseName.setError("Exercise name is required");
+            Toast.makeText(this, "Please enter an exercise name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (name.length() > MAX_EXERCISE_NAME_LENGTH) {
+            editExerciseName.setError("Name too long (max " + MAX_EXERCISE_NAME_LENGTH + " characters)");
+            Toast.makeText(this, "Exercise name is too long", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Validate sets and reps
+        if (setsStr.isEmpty()) {
+            editSets.setError("Sets required");
+            Toast.makeText(this, "Please enter number of sets", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (repsStr.isEmpty()) {
+            editReps.setError("Reps required");
+            Toast.makeText(this, "Please enter number of reps", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -86,24 +134,47 @@ public class AddPlanExercisesActivity extends AppCompatActivity {
             sets = Integer.parseInt(setsStr);
             reps = Integer.parseInt(repsStr);
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Sets and reps must be numbers.", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Invalid number format for sets/reps", e);
+            Toast.makeText(this, "Sets and reps must be valid numbers", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        long selectedDayId = dayIds.get(daySelector.getSelectedItemPosition());
-        dbHelper.insertExercise(selectedDayId, name, sets, reps);
+        // Validate ranges
+        if (sets < MIN_SETS || sets > MAX_SETS) {
+            editSets.setError("Sets must be between " + MIN_SETS + " and " + MAX_SETS);
+            Toast.makeText(this, "Invalid number of sets", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        String entry = name + " - " + sets + " sets x " + reps + " reps";
-        TextView entryView = new TextView(this);
-        entryView.setText(entry);
-        entryView.setTextColor(getColor(android.R.color.white));
-        entryView.setPadding(0, 8, 0, 8);
-        exerciseContainer.addView(entryView);
+        if (reps < MIN_REPS || reps > MAX_REPS) {
+            editReps.setError("Reps must be between " + MIN_REPS + " and " + MAX_REPS);
+            Toast.makeText(this, "Invalid number of reps", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Clear input fields
-        editExerciseName.setText("");
-        editSets.setText("");
-        editReps.setText("");
+        // Insert exercise
+        try {
+            long selectedDayId = dayIds.get(daySelector.getSelectedItemPosition());
+            dbHelper.insertExercise(selectedDayId, name, sets, reps);
+
+            String entry = name + " - " + sets + " sets x " + reps + " reps";
+            TextView entryView = new TextView(this);
+            entryView.setText(entry);
+            entryView.setTextColor(getColor(android.R.color.white));
+            entryView.setPadding(0, 8, 0, 8);
+            exerciseContainer.addView(entryView);
+
+            // Clear input fields
+            editExerciseName.setText("");
+            editSets.setText("");
+            editReps.setText("");
+
+            Log.d(TAG, "Added exercise: " + name + " (" + sets + "x" + reps + ")");
+            Toast.makeText(this, "Exercise added", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "Error adding exercise", e);
+            Toast.makeText(this, "Error adding exercise", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void saveExercises() {

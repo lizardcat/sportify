@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -14,6 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 public class AddPlanDaysActivity extends AppCompatActivity {
+
+    private static final String TAG = "AddPlanDaysActivity";
+    private static final int MAX_DAY_TITLE_LENGTH = 100;
+    private static final int MAX_DAYS_PER_PLAN = 7;
 
     private LinearLayout dayContainer;
     private Button btnAddDay, btnNext;
@@ -38,8 +43,13 @@ public class AddPlanDaysActivity extends AppCompatActivity {
         addDayInputField("Day 1 - Full Body");
 
         btnAddDay.setOnClickListener(v -> {
+            if (dayInputs.size() >= MAX_DAYS_PER_PLAN) {
+                Toast.makeText(this, "Maximum " + MAX_DAYS_PER_PLAN + " days per plan", Toast.LENGTH_SHORT).show();
+                return;
+            }
             int count = dayInputs.size() + 1;
             addDayInputField("Day " + count + " - ");
+            Log.d(TAG, "Added day input field #" + count);
         });
 
         btnNext.setOnClickListener(v -> {
@@ -76,24 +86,41 @@ public class AddPlanDaysActivity extends AppCompatActivity {
 
     private boolean validateAndSaveDays() {
         boolean isValid = true;
+
+        // Validate all day titles
         for (EditText input : dayInputs) {
             String title = input.getText().toString().trim();
             if (title.isEmpty()) {
                 input.setError("Please enter a day title");
                 isValid = false;
+            } else if (title.length() > MAX_DAY_TITLE_LENGTH) {
+                input.setError("Title too long (max " + MAX_DAY_TITLE_LENGTH + " characters)");
+                isValid = false;
             }
         }
 
         if (!isValid) {
-            Toast.makeText(this, "Please fill in all day titles", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fix the errors in day titles", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        for (EditText input : dayInputs) {
-            String title = input.getText().toString().trim();
-            dbHelper.insertPlanDay(planId, title);
+        // Save all days to database
+        try {
+            for (EditText input : dayInputs) {
+                String title = input.getText().toString().trim();
+                long dayId = dbHelper.insertPlanDay(planId, title);
+                if (dayId <= 0) {
+                    Log.e(TAG, "Failed to insert day: " + title);
+                    Toast.makeText(this, "Error saving workout day", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                Log.d(TAG, "Inserted day: " + title + " with ID: " + dayId);
+            }
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving days", e);
+            Toast.makeText(this, "Error saving workout days", Toast.LENGTH_SHORT).show();
+            return false;
         }
-
-        return true;
     }
 }
