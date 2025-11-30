@@ -1,6 +1,7 @@
 package com.example.sportify;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -8,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Locale;
 public class WorkoutSummaryActivity extends AppCompatActivity {
+
+    private static final String TAG = "WorkoutSummaryActivity";
 
     private TextView tvSummaryTitle, tvSummaryDuration, tvSummaryCalories, tvSummaryNotes, tvSummaryText;
     private Button btnDone;
@@ -19,7 +22,10 @@ public class WorkoutSummaryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_summary);
 
-        exercises = getIntent().getStringArrayExtra("exercises");
+        // Safely get intent extras with null checks
+        if (getIntent() != null) {
+            exercises = getIntent().getStringArrayExtra("exercises");
+        }
 
         tvSummaryTitle = findViewById(R.id.tvSummaryTitle);
         tvSummaryDuration = findViewById(R.id.tvSummaryDuration);
@@ -28,14 +34,26 @@ public class WorkoutSummaryActivity extends AppCompatActivity {
         tvSummaryText = findViewById(R.id.tvSummaryText);
         btnDone = findViewById(R.id.btnDone);
 
-        // Get data from intent
-        String summary = getIntent().getStringExtra("summary");
-        String activityType = getIntent().getStringExtra("activityType");
-        double duration = getIntent().getDoubleExtra("duration", 0.0);
-        double calories = getIntent().getDoubleExtra("calories", 0.0);
-        String planName = getIntent().getStringExtra("plan_name");
-        String dayName = getIntent().getStringExtra("day_name");
-        String notes = getIntent().getStringExtra("notes");
+        // Get data from intent with safe defaults
+        String summary = null;
+        String activityType = null;
+        double duration = 0.0;
+        double calories = 0.0;
+        String planName = null;
+        String dayName = null;
+        String notes = null;
+
+        if (getIntent() != null) {
+            summary = getIntent().getStringExtra("summary");
+            activityType = getIntent().getStringExtra("activityType");
+            duration = getIntent().getDoubleExtra("duration", 0.0);
+            calories = getIntent().getDoubleExtra("calories", 0.0);
+            planName = getIntent().getStringExtra("plan_name");
+            dayName = getIntent().getStringExtra("day_name");
+            notes = getIntent().getStringExtra("notes");
+        } else {
+            Log.w(TAG, "Intent is null in WorkoutSummaryActivity");
+        }
 
         // Title (Plan + Day if available)
         if (planName != null && dayName != null) {

@@ -3,6 +3,8 @@ package com.example.sportify;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +23,8 @@ import java.util.Locale;
 
 public class StartWorkoutActivity extends AppCompatActivity {
 
+    private static final String TAG = "StartWorkoutActivity";
+
     private Spinner spinnerActivityType;
     private TextView textTimer;
     private Button btnStartStop;
@@ -32,7 +36,7 @@ public class StartWorkoutActivity extends AppCompatActivity {
 
     private boolean isRunning = false;
     private long startTime = 0L;
-    private Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable timerRunnable;
 
     private FitnessDatabaseHelper dbHelper;
@@ -170,10 +174,19 @@ public class StartWorkoutActivity extends AppCompatActivity {
 
         if (activityType.equalsIgnoreCase("Strength")) {
             try {
-                setsVal = Integer.parseInt(editSets.getText().toString().trim());
-                repsVal = Integer.parseInt(editReps.getText().toString().trim());
-                weightVal = Double.parseDouble(editWeight.getText().toString().trim());
+                String setsText = editSets.getText().toString().trim();
+                String repsText = editReps.getText().toString().trim();
+                String weightText = editWeight.getText().toString().trim();
+
+                if (!setsText.isEmpty() && !repsText.isEmpty() && !weightText.isEmpty()) {
+                    setsVal = Integer.parseInt(setsText);
+                    repsVal = Integer.parseInt(repsText);
+                    weightVal = Double.parseDouble(weightText);
+                } else {
+                    Toast.makeText(this, "Please fill in all strength fields.", Toast.LENGTH_SHORT).show();
+                }
             } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid number format for strength values", e);
                 Toast.makeText(this, "Invalid sets/reps/weight input.", Toast.LENGTH_SHORT).show();
             }
         }
@@ -217,5 +230,35 @@ public class StartWorkoutActivity extends AppCompatActivity {
             default: met = 4.0;
         }
         return (met * userWeightKg * (durationMin / 60.0));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Remove handler callbacks when activity is paused to prevent memory leaks
+        if (handler != null && timerRunnable != null) {
+            handler.removeCallbacks(timerRunnable);
+            Log.d(TAG, "Handler callbacks removed in onPause");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Resume timer if it was running
+        if (isRunning && !isPaused && timerRunnable != null) {
+            handler.post(timerRunnable);
+            Log.d(TAG, "Handler callbacks resumed in onResume");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up handler callbacks to prevent memory leaks
+        if (handler != null && timerRunnable != null) {
+            handler.removeCallbacks(timerRunnable);
+            Log.d(TAG, "Handler callbacks removed in onDestroy");
+        }
     }
 }

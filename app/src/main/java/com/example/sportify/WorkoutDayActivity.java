@@ -3,15 +3,19 @@ package com.example.sportify;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class WorkoutDayActivity extends AppCompatActivity {
+
+    private static final String TAG = "WorkoutDayActivity";
 
     private TextView tvDayTitle;
     private LinearLayout exerciseListLayout;
@@ -30,15 +34,23 @@ public class WorkoutDayActivity extends AppCompatActivity {
         btnStartWorkout = findViewById(R.id.btnStartWorkout);
         dbHelper = new FitnessDatabaseHelper(this);
 
-        dayId = getIntent().getLongExtra("day_id", -1);
-        dayTitle = getIntent().getStringExtra("day_title");
+        // Safely get intent extras with null checks
+        if (getIntent() != null) {
+            dayId = getIntent().getLongExtra("day_id", -1);
+            dayTitle = getIntent().getStringExtra("day_title");
+        } else {
+            Log.w(TAG, "Intent is null in WorkoutDayActivity");
+            dayId = -1;
+        }
 
         if (dayId == -1) {
+            Log.e(TAG, "Invalid day ID");
             tvDayTitle.setText("Missing Day");
+            Toast.makeText(this, "Error: Invalid workout day", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        tvDayTitle.setText(dayTitle);
+        tvDayTitle.setText(dayTitle != null ? dayTitle : "Workout Day");
         loadExercises();
 
         btnStartWorkout.setOnClickListener(v -> {
@@ -49,15 +61,30 @@ public class WorkoutDayActivity extends AppCompatActivity {
     }
 
     private void loadExercises() {
-        Cursor cursor = dbHelper.getExercisesForDay(dayId);
-        while (cursor.moveToNext()) {
-            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-            int sets = cursor.getInt(cursor.getColumnIndexOrThrow("sets"));
-            int reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"));
+        Cursor cursor = null;
+        try {
+            cursor = dbHelper.getExercisesForDay(dayId);
+            if (cursor == null) {
+                Log.w(TAG, "Cursor is null when loading exercises");
+                Toast.makeText(this, "Error loading exercises", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            addExerciseCard(name, sets, reps);
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                int sets = cursor.getInt(cursor.getColumnIndexOrThrow("sets"));
+                int reps = cursor.getInt(cursor.getColumnIndexOrThrow("reps"));
+
+                addExerciseCard(name, sets, reps);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading exercises", e);
+            Toast.makeText(this, "Error loading exercises", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        cursor.close();
     }
 
     private void addExerciseCard(String name, int sets, int reps) {

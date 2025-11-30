@@ -3,14 +3,19 @@ package com.example.sportify;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PlanDaysActivity extends AppCompatActivity {
+
+    private static final String TAG = "PlanDaysActivity";
 
     private LinearLayout dayListContainer;
     private FitnessDatabaseHelper dbHelper;
@@ -31,17 +36,30 @@ public class PlanDaysActivity extends AppCompatActivity {
     }
 
     private void loadPlanDays() {
-        Cursor cursor = dbHelper.getDaysForPlan(planId);
+        Cursor cursor = null;
+        try {
+            cursor = dbHelper.getDaysForPlan(planId);
+            if (cursor == null) {
+                Log.w(TAG, "Cursor is null when loading plan days");
+                Toast.makeText(this, "Error loading workout days", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        while (cursor.moveToNext()) {
-            long dayId = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
-            String title = cursor.getString(cursor.getColumnIndexOrThrow("day_title"));
+            while (cursor.moveToNext()) {
+                long dayId = cursor.getLong(cursor.getColumnIndexOrThrow("id"));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow("day_title"));
 
-            View dayCard = createDayCard(dayId, title);
-            dayListContainer.addView(dayCard);
+                View dayCard = createDayCard(dayId, title);
+                dayListContainer.addView(dayCard);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading plan days", e);
+            Toast.makeText(this, "Error loading workout days", Toast.LENGTH_SHORT).show();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-
-        cursor.close();
     }
 
     private View createDayCard(long dayId, String title) {

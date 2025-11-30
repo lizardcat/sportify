@@ -5,11 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class FitnessDatabaseHelper extends SQLiteOpenHelper {
 
+    private static final String TAG = "FitnessDatabaseHelper";
     private static final String DATABASE_NAME = "fitness_tracker.db";
     private static final int DATABASE_VERSION = 3;
+    private static final double DEFAULT_WEIGHT_KG = 70.0;
 
     public FitnessDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,13 +75,24 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS workouts");
-        db.execSQL("DROP TABLE IF EXISTS user_profile");
-        db.execSQL("DROP TABLE IF EXISTS goals");
-        db.execSQL("DROP TABLE IF EXISTS plans");
-        db.execSQL("DROP TABLE IF EXISTS plan_days");
-        db.execSQL("DROP TABLE IF EXISTS plan_exercises");
-        onCreate(db);
+        // Implement proper migration strategy instead of dropping tables
+        // This preserves user data during app updates
+        Log.i(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion);
+
+        // Example migration logic:
+        // if (oldVersion < 2) {
+        //     db.execSQL("ALTER TABLE workouts ADD COLUMN new_column TEXT");
+        // }
+        // if (oldVersion < 3) {
+        //     db.execSQL("ALTER TABLE user_profile ADD COLUMN another_column INTEGER DEFAULT 0");
+        // }
+
+        // For now, if there's no migration path, we only recreate if absolutely necessary
+        // WARNING: This should be updated with proper migrations before production!
+        if (oldVersion < newVersion) {
+            Log.w(TAG, "No migration path defined. Data will be preserved where possible.");
+            // Only add new tables or columns as needed, don't drop existing ones
+        }
     }
 
     public void insertCompletedWorkout(String date, String planName, String dayName, long dayId, String durationStr, String notes) {
@@ -95,8 +109,11 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
         values.put("notes", notes);
         values.put("day_id", dayId);
 
-        db.insert("workouts", null, values);
-        db.close();
+        long result = db.insert("workouts", null, values);
+        if (result == -1) {
+            Log.e(TAG, "Failed to insert completed workout");
+        }
+        // Don't close db - let SQLiteOpenHelper manage the connection
     }
 
     public void insertWorkout(String date, String startTime, String endTime, String activityType,
@@ -117,31 +134,54 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
         values.put("weight_kg", weightKg);
         values.put("notes", notes);
 
-        db.insert("workouts", null, values);
-        db.close();
+        long result = db.insert("workouts", null, values);
+        if (result == -1) {
+            Log.e(TAG, "Failed to insert workout");
+        }
+        // Don't close db - let SQLiteOpenHelper manage the connection
     }
 
     public double getUserWeightKg() {
         SQLiteDatabase db = this.getReadableDatabase();
-        double weight = 70.0; // default fallback
+        double weight = DEFAULT_WEIGHT_KG;
+        Cursor cursor = null;
 
-        Cursor cursor = db.rawQuery("SELECT weight_kg FROM user_profile WHERE id = 1", null);
-        if (cursor.moveToFirst()) {
-            weight = cursor.getDouble(cursor.getColumnIndexOrThrow("weight_kg"));
+        try {
+            cursor = db.rawQuery("SELECT weight_kg FROM user_profile WHERE id = 1", null);
+            if (cursor != null && cursor.moveToFirst()) {
+                weight = cursor.getDouble(cursor.getColumnIndexOrThrow("weight_kg"));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting user weight", e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            // Don't close db - let SQLiteOpenHelper manage the connection
         }
-        cursor.close();
-        db.close();
         return weight;
     }
 
     private double convertDurationToMinutes(String durationStr) {
         try {
+            if (durationStr == null || durationStr.trim().isEmpty()) {
+                Log.w(TAG, "Duration string is null or empty");
+                return 0.0;
+            }
             String[] parts = durationStr.split(":");
+            if (parts.length != 3) {
+                Log.w(TAG, "Invalid duration format: " + durationStr);
+                return 0.0;
+            }
             int hours = Integer.parseInt(parts[0]);
             int minutes = Integer.parseInt(parts[1]);
             int seconds = Integer.parseInt(parts[2]);
             return hours * 60 + minutes + (seconds / 60.0);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Error parsing duration: " + durationStr, e);
+            return 0.0;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.e(TAG, "Invalid duration format: " + durationStr, e);
             return 0.0;
         }
     }
@@ -176,9 +216,12 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
     public void seedTestData() {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.execSQL("DELETE FROM plan_exercises");
-        db.execSQL("DELETE FROM plan_days");
-        db.execSQL("DELETE FROM plans");
+        // Use transaction to ensure data consistency
+        db.beginTransaction();
+        try {
+            db.execSQL("DELETE FROM plan_exercises");
+            db.execSQL("DELETE FROM plan_days");
+            db.execSQL("DELETE FROM plans");
 
         // STRONGLIFTS
         long planId = insertPlan("Stronglifts 5x5", "A simple full-body strength training program with compound lifts.", "Build strength, muscle, and improve form on barbell lifts.");
@@ -294,6 +337,15 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
 // PHAT
         insertCompletedWorkout("2025-04-09", "PHAT", "Day 1 - Upper Power", phatDay1, "01:05:00", "Hit 5 reps on bench with 90kg.");
         insertCompletedWorkout("2025-04-10", "PHAT", "Day 2 - Lower Power", phatDay2, "01:00:00", "Legs shaking by the end.");
+
+            // Mark transaction as successful
+            db.setTransactionSuccessful();
+            Log.i(TAG, "Test data seeded successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error seeding test data", e);
+        } finally {
+            db.endTransaction();
+        }
     }
 
     public Cursor getAllPlans() {
@@ -313,12 +365,22 @@ public class FitnessDatabaseHelper extends SQLiteOpenHelper {
 
     public String getPlanNameById(long id) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT name FROM plans WHERE id = ?", new String[]{String.valueOf(id)});
         String name = "Unknown";
-        if (cursor.moveToFirst()) {
-            name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+        Cursor cursor = null;
+
+        try {
+            cursor = db.rawQuery("SELECT name FROM plans WHERE id = ?", new String[]{String.valueOf(id)});
+            if (cursor != null && cursor.moveToFirst()) {
+                name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting plan name for id: " + id, e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            // Don't close db - let SQLiteOpenHelper manage the connection
         }
-        cursor.close();
         return name;
     }
 
